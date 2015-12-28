@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">LuckyMoney</string>
+    <string name="target_pname">com.tencent.mm</string>
+    <string name="notify_pattern">.*\\[微信红包\\].+</string>
+    <string name="chat_pattern">领取红包</string>
+    <!--<string name="target_pattern">.+\\: \\[微信红包\\].+</string>-->
+</resources>
