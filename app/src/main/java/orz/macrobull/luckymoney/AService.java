@@ -30,8 +30,8 @@ public class AService extends AccessibilityService {
 
 	public static String getStatistics(){
 		return String.format(
-				"点了%d个开了%d个红包\n抢到了%d个红包\n从通知进入了%d次"
-						+ "\n路过的%.2f元中抢到了%.2f元"
+				"点了%d个红包, 开了%d个\n抢到了%d个红包\n从通知进入了%d次"
+						+ "\n在路过的%.2f元中抢到了%.2f元"
 				, cnt_get, cnt_detail, cnt_open, cnt_new, amount_total, amount_success);
 	}
 

@@ -24,7 +24,6 @@
             android:text="NLStatus"
             android:id="@+id/b_nl"
             android:layout_gravity="center_horizontal"
-            android:elevation="2dp"
             android:onClick="openNLSetting"/>
 
         <Button
@@ -33,7 +32,6 @@
             android:text="ASStatus"
             android:id="@+id/b_as"
             android:layout_gravity="center_horizontal"
-            android:elevation="2dp"
             android:onClick="openASSetting"/>
     </LinearLayout>
 

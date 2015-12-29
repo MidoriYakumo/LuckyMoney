@@ -86,10 +86,10 @@ public class NLService extends NotificationListenerService {
 				keyLock.disableKeyguard();
 				wakeLock.acquire();
 				try {
-					while (!powerMan.isInteractive()) {
+					while (!powerMan.isScreenOn()) {
 						Log.d("keyguard", String.valueOf(keyMan.inKeyguardRestrictedInputMode()));
 						Log.d("keyguard", String.valueOf(powerMan.isScreenOn()));
-						Log.d("keyguard", String.valueOf(powerMan.isInteractive()));
+//						Log.d("keyguard", String.valueOf(powerMan.isInteractive())); // API20+
 						Log.d("keyguard", "locked");
 						Thread.sleep(100); // bad workaround;
 					}
@@ -104,4 +104,9 @@ public class NLService extends NotificationListenerService {
 		}
 	}
 
+	@Override
+	public void onNotificationRemoved(StatusBarNotification sbn) { // SDK21-
+		super.onNotificationRemoved(sbn);
+		Log.d("onNotificationRemoved", "!");
+	}
 }

@@ -67,7 +67,8 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	public void openNLSetting(View v){
-		Intent intent=new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
+//		Intent intent=new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS); //API22+
+		Intent intent=new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
 		startActivity(intent);
 	}
 
