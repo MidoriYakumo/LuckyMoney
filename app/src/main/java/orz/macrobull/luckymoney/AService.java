@@ -1,25 +1,18 @@
 package orz.macrobull.luckymoney;
 
 import android.accessibilityservice.AccessibilityService;
-import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityRecord;
+import android.util.Log;
 
 import java.util.List;
 
 /**
  * Created by macrobull on 12/28/15.
+ * ...
  */
 public class AService extends AccessibilityService {
-
-	enum State {
-		CHAT_WALK,
-		CHAT_IDLE,
-		CHAT_NEW,
-		OPEN,
-		DETAIL,
-	}
 
 	static State state = State.CHAT_WALK;
 	static Integer openStackSize = 0;
@@ -63,7 +56,6 @@ public class AService extends AccessibilityService {
 
 		return mNodes.size();
 	}
-
 
 	Integer getFromLastNode(AccessibilityNodeInfo root, Integer size, boolean dup){
 		List<AccessibilityNodeInfo> mNodes =
@@ -119,10 +111,10 @@ public class AService extends AccessibilityService {
 
 			case DETAIL:
 //				if (!source.getClassName().toString().equals("android.widget.LinearLayout")) {
-					if (source.getText() == null) break;
-					if (!( source.getText().toString().equals("Details")
+				if (source.getText() == null) break;
+				if (!( source.getText().toString().equals("Details")
 						|| source.getText().toString().equals("红包详情")
-						)) break;
+				)) break;
 //				}
 
 				Log.d("click", "BACK");
@@ -145,17 +137,29 @@ public class AService extends AccessibilityService {
 				} else {
 					if (event.getRecordCount()<=0) return;
 					record = event.getRecord(0); // Wechat only add 1 node once.
+					if (record.getText() == null) return;
+
 					Log.d("chat record", record.toString());
 					Log.d("chat source", source.toString());
 
-					for (CharSequence cText: record.getText()){
-						if (cText.toString().matches(getResources().getString(R.string.chat_pattern))) {
-							source = source.getParent();
-							Log.d("source", source.toString());
-							openStackSize += getFromLastNode(source, 1, false);
-							if (openStackSize>0) state = State.OPEN;
-							break;
+					boolean maybeMoney = false;
+
+					if (record.getText().size()>3) {
+						for (CharSequence cText : record.getText()) {
+							if (cText.toString().matches(getResources().getString(R.string.chat_pattern))) {
+								maybeMoney = true;
+								break;
+							}
 						}
+					}
+
+					if (record.getText().toString().matches("\\[\\d+\\]")) maybeMoney = true;
+
+					if (maybeMoney) {
+//						source = source.getParent();
+						Log.d("source", source.toString());
+						openStackSize += getFromLastNode(source, 1, false);
+						if (openStackSize>0) state = State.OPEN;
 					}
 
 				}
@@ -168,5 +172,13 @@ public class AService extends AccessibilityService {
 				break;
 		}
 
+	}
+
+	enum State {
+		CHAT_WALK,
+		CHAT_IDLE,
+		CHAT_NEW,
+		OPEN,
+		DETAIL,
 	}
 }

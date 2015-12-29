@@ -2,8 +2,10 @@ package orz.macrobull.luckymoney;
 
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
@@ -15,31 +17,43 @@ import android.util.Log;
 
 public class NLService extends NotificationListenerService {
 
-	static private boolean mBinded = false;
+	static private boolean mBinding = false;
 	static private boolean mInGame = false;
+	static private PowerManager.WakeLock wakeLock;
+
+	static public boolean getBindStatus() {
+		return mBinding;
+	}
+
+	static public boolean catchTheGame() {
+		boolean ret = mInGame;
+		mInGame = false;
+		return ret;
+	}
+
+	static public void releaseWakeLock() {
+		Log.d("wakelock", String.valueOf(wakeLock.isHeld()));
+		wakeLock.release();
+	}
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		IBinder mIBinder =  super.onBind(intent);
-		mBinded = true;
+		IBinder mIBinder = super.onBind(intent);
+		mBinding = true;
+
+		wakeLock = ((PowerManager) getSystemService(Context.POWER_SERVICE)).newWakeLock(
+				PowerManager.FULL_WAKE_LOCK
+						| PowerManager.ACQUIRE_CAUSES_WAKEUP
+						| PowerManager.ON_AFTER_RELEASE, "WakeLock");
+
 		return mIBinder;
 	}
 
 	@Override
 	public boolean onUnbind(Intent intent) {
 		boolean mOnUnbind = super.onUnbind(intent);
-		mBinded = false;
+		mBinding = false;
 		return mOnUnbind;
-	}
-
-	static public boolean getBindStatus(){
-		return mBinded;
-	}
-
-	static public boolean catchTheGame(){
-		boolean ret = mInGame;
-		mInGame = false;
-		return ret;
 	}
 
 	@Override
@@ -49,6 +63,8 @@ public class NLService extends NotificationListenerService {
 		Notification notification = sbn.getNotification();
 		String fullText = notification.extras.getString("android.text");
 
+		if (fullText == null) return;
+
 //		Log.i("tickerText", n.tickerText.toString());
 //		Log.i("extras", n.extras.toString());
 		Log.d("fullText", fullText);
@@ -57,6 +73,8 @@ public class NLService extends NotificationListenerService {
 
 		Log.d("contentIntent", notification.contentIntent.toString());
 		try {
+			Log.d("wakelock", String.valueOf(wakeLock.isHeld()));
+			wakeLock.acquire();
 			sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
 			mInGame = true;
 			notification.contentIntent.send(this, 0, new Intent());
