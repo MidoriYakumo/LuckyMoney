@@ -15,7 +15,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true">
+        android:layout_centerVertical="true"
+        android:id="@+id/linearLayout">
 
         <Button
             android:layout_width="wrap_content"
@@ -35,4 +36,15 @@
             android:elevation="2dp"
             android:onClick="openASSetting"/>
     </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="stat"
+        android:id="@+id/t_stat"
+        android:layout_below="@+id/linearLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:textAlignment="center"/>
 </RelativeLayout>

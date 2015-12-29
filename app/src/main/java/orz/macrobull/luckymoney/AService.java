@@ -20,6 +20,21 @@ public class AService extends AccessibilityService {
 	static Integer lastNode = 0;
 	static boolean lock = false;
 
+	static Integer cnt_get = 0;
+	static Integer cnt_open = 0;
+	static Integer cnt_detail = 0;
+	static Integer cnt_new = 0;
+	static Float amount_total = Float.valueOf(0);
+	static Float amount_success = Float.valueOf(0);
+	static boolean openIsValid = false;
+
+	public static String getStatistics(){
+		return String.format(
+				"点了%d个开了%d个红包\n抢到了%d个红包\n从通知进入了%d次"
+						+ "\n路过的%.2f元中抢到了%.2f元"
+				, cnt_get, cnt_detail, cnt_open, cnt_new, amount_total, amount_success);
+	}
+
 	@Override
 	public void onAccessibilityEvent(AccessibilityEvent event) {
 		if (lock) return;
@@ -51,6 +66,7 @@ public class AService extends AccessibilityService {
 			Log.d("node.parent", node.getParent().toString());
 			Log.d("click", "GET" + Integer.valueOf(node.hashCode()).toString());
 			node.getParent().performAction(AccessibilityNodeInfo.ACTION_CLICK);
+			cnt_get += 1;
 			lastNode = node.hashCode();
 		}
 
@@ -69,6 +85,7 @@ public class AService extends AccessibilityService {
 			if (dup || (lastNode != node.hashCode())) {
 				Log.d("click", "GET" + Integer.valueOf(node.hashCode()).toString());
 				node.getParent().performAction(AccessibilityNodeInfo.ACTION_CLICK);
+				cnt_get += 1;
 				lastNode = node.hashCode();
 			} else {
 				Log.d("node duplicate", Integer.valueOf(node.hashCode()).toString());
@@ -105,13 +122,27 @@ public class AService extends AccessibilityService {
 				if (source.getClassName().toString().equals("android.widget.Button")) {
 					Log.d("click", "OPEN");
 					source.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+					cnt_open += 1;
+					openIsValid = true;
 					state = State.DETAIL;
 					break;
 				}
 
 			case DETAIL:
+				Log.d("detail", source.toString());
 //				if (!source.getClassName().toString().equals("android.widget.LinearLayout")) {
 				if (source.getText() == null) break;
+				Log.d("detail text", source.getText().toString());
+				if (source.getText().toString().matches("\\d+\\.\\d\\d")){
+					try {
+						Log.d("amount", "got value:" + source.getText().toString());
+						amount_total += Float.valueOf(source.getText().toString());
+						if (openIsValid) amount_success += Float.valueOf(source.getText().toString());
+						openIsValid = false;
+					} catch (Exception e){
+						Log.w("amount", e.getMessage());
+					}
+				}
 				if (!( source.getText().toString().equals("Details")
 						|| source.getText().toString().equals("红包详情")
 				)) break;
@@ -119,6 +150,7 @@ public class AService extends AccessibilityService {
 
 				Log.d("click", "BACK");
 				performGlobalAction(GLOBAL_ACTION_BACK); // Not available when screen is locked.
+				cnt_detail += 1;
 				openStackSize -= 1;
 
 				if (openStackSize > 0) {
@@ -131,6 +163,7 @@ public class AService extends AccessibilityService {
 				break;
 			case CHAT_IDLE:
 				if (NLService.catchTheGame()){
+					cnt_new += 1;
 					newSize += 1;
 					state = State.CHAT_NEW;
 				} else {

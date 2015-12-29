@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
@@ -57,8 +58,12 @@ public class MainActivity extends AppCompatActivity {
 
 		Button b_nl = (Button) findViewById(R.id.b_nl);
 		Button b_as = (Button) findViewById(R.id.b_as);
-		b_nl.setText("Notification Listener Service: " + (nl_status?"ON":"OFF"));
-		b_as.setText("Accessibility Service: " + (as_status?"ON":"OFF"));
+		b_nl.setText("通知监听: " + (nl_status?"已启动":"未启动/启用"));
+		b_as.setText("辅助点击: " + (as_status?"已启动":"未启用"));
+
+
+		TextView t_stat = (TextView) findViewById(R.id.t_stat);
+		t_stat.setText(AService.getStatistics());
 	}
 
 	public void openNLSetting(View v){
