@@ -3,6 +3,7 @@
     package="orz.macrobull.luckymoney" >
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"

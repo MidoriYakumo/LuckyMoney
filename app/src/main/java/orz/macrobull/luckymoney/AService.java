@@ -118,14 +118,13 @@ public class AService extends AccessibilityService {
 //				}
 
 				Log.d("click", "BACK");
-				performGlobalAction(GLOBAL_ACTION_BACK);
+				performGlobalAction(GLOBAL_ACTION_BACK); // Not available when screen is locked.
 				openStackSize -= 1;
 
 				if (openStackSize > 0) {
 					state = State.OPEN;
 				} else {
-//					Log.d("click", "BACK");
-//					performGlobalAction(GLOBAL_ACTION_BACK);
+					NLService.releaseLock();
 					state = State.CHAT_IDLE;
 				}
 

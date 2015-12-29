@@ -1,8 +1,8 @@
 package orz.macrobull.luckymoney;
 
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -19,7 +19,10 @@ public class NLService extends NotificationListenerService {
 
 	static private boolean mBinding = false;
 	static private boolean mInGame = false;
+	static private PowerManager powerMan;
 	static private PowerManager.WakeLock wakeLock;
+	static private KeyguardManager keyMan;
+	static private KeyguardManager.KeyguardLock keyLock;
 
 	static public boolean getBindStatus() {
 		return mBinding;
@@ -31,9 +34,10 @@ public class NLService extends NotificationListenerService {
 		return ret;
 	}
 
-	static public void releaseWakeLock() {
+	static public void releaseLock() {
 		Log.d("wakelock", String.valueOf(wakeLock.isHeld()));
-		wakeLock.release();
+		if (wakeLock.isHeld()) wakeLock.release();
+		keyLock.reenableKeyguard();
 	}
 
 	@Override
@@ -41,10 +45,13 @@ public class NLService extends NotificationListenerService {
 		IBinder mIBinder = super.onBind(intent);
 		mBinding = true;
 
-		wakeLock = ((PowerManager) getSystemService(Context.POWER_SERVICE)).newWakeLock(
-				PowerManager.FULL_WAKE_LOCK
-						| PowerManager.ACQUIRE_CAUSES_WAKEUP
-						| PowerManager.ON_AFTER_RELEASE, "WakeLock");
+		powerMan = (PowerManager) getSystemService(POWER_SERVICE);
+		wakeLock = powerMan.newWakeLock(
+				PowerManager.SCREEN_DIM_WAKE_LOCK
+						| PowerManager.ACQUIRE_CAUSES_WAKEUP, "WakeLock");
+
+		keyMan = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+		keyLock = keyMan.newKeyguardLock("KeyLock");
 
 		return mIBinder;
 	}
@@ -73,9 +80,23 @@ public class NLService extends NotificationListenerService {
 
 		Log.d("contentIntent", notification.contentIntent.toString());
 		try {
-			Log.d("wakelock", String.valueOf(wakeLock.isHeld()));
-			wakeLock.acquire();
 			sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+			Log.d("wakelock", String.valueOf(wakeLock.isHeld()));
+			if (!wakeLock.isHeld()) {
+				keyLock.disableKeyguard();
+				wakeLock.acquire();
+				try {
+					while (!powerMan.isInteractive()) {
+						Log.d("keyguard", String.valueOf(keyMan.inKeyguardRestrictedInputMode()));
+						Log.d("keyguard", String.valueOf(powerMan.isScreenOn()));
+						Log.d("keyguard", String.valueOf(powerMan.isInteractive()));
+						Log.d("keyguard", "locked");
+						Thread.sleep(100); // bad workaround;
+					}
+				} catch (Exception e){
+					//
+				}
+			}
 			mInGame = true;
 			notification.contentIntent.send(this, 0, new Intent());
 		} catch (PendingIntent.CanceledException e) {
