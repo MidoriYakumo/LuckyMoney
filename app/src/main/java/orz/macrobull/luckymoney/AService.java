@@ -24,6 +24,7 @@ public class AService extends AccessibilityService {
 	static State state = State.CHAT_WALK;
 	static Integer openStackSize = 0;
 	static Integer newSize = 0;
+	static Integer lastNode = 0;
 	static boolean lock = false;
 
 	@Override
@@ -55,15 +56,16 @@ public class AService extends AccessibilityService {
 		for (AccessibilityNodeInfo node: mNodes){
 			Log.d("node", node.toString());
 			Log.d("node.parent", node.getParent().toString());
-			Log.d("click", "GET");
+			Log.d("click", "GET" + Integer.valueOf(node.hashCode()).toString());
 			node.getParent().performAction(AccessibilityNodeInfo.ACTION_CLICK);
+			lastNode = node.hashCode();
 		}
 
 		return mNodes.size();
 	}
 
 
-	Integer getFromLastNode(AccessibilityNodeInfo root, Integer size){
+	Integer getFromLastNode(AccessibilityNodeInfo root, Integer size, boolean dup){
 		List<AccessibilityNodeInfo> mNodes =
 				root.findAccessibilityNodeInfosByText(getResources().getString(R.string.chat_pattern));
 
@@ -72,18 +74,21 @@ public class AService extends AccessibilityService {
 			AccessibilityNodeInfo node = mNodes.get(i);
 			Log.d("node", node.toString());
 			Log.d("node.parent", node.getParent().toString());
-			Log.d("click", "GET");
-			node.getParent().performAction(AccessibilityNodeInfo.ACTION_CLICK);
+			if (dup || (lastNode != node.hashCode())) {
+				Log.d("click", "GET" + Integer.valueOf(node.hashCode()).toString());
+				node.getParent().performAction(AccessibilityNodeInfo.ACTION_CLICK);
+				lastNode = node.hashCode();
+			} else {
+				Log.d("node duplicate", Integer.valueOf(node.hashCode()).toString());
+				size -= 1;
+			}
 		}
 
 		return size;
 	}
 
 	void logState(){
-		Log.d("state", state.toString() + "/" + openStackSize.toString());
-//		if (state.equals(State.OPEN) || state.equals(State.DETAIL)) {
-//			Toast.makeText(this, state.toString() + "/" + openStackSize.toString(), Toast.LENGTH_SHORT).show();
-//		}
+		Log.d("state", state.toString() + "/" + openStackSize.toString() + "/" + newSize.toString());
 	}
 
 	void process(AccessibilityEvent event){
@@ -145,8 +150,9 @@ public class AService extends AccessibilityService {
 
 					for (CharSequence cText: record.getText()){
 						if (cText.toString().matches(getResources().getString(R.string.chat_pattern))) {
+							source = source.getParent();
 							Log.d("source", source.toString());
-							openStackSize += getFromLastNode(source, 1);
+							openStackSize += getFromLastNode(source, 1, false);
 							if (openStackSize>0) state = State.OPEN;
 							break;
 						}
@@ -155,7 +161,7 @@ public class AService extends AccessibilityService {
 				}
 				break;
 			case CHAT_NEW:
-				openStackSize += getFromLastNode(source, newSize);
+				openStackSize += getFromLastNode(source, newSize, true);
 				newSize -= openStackSize;
 
 				if (openStackSize>0) state = State.OPEN;
