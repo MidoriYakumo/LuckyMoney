@@ -57,7 +57,7 @@ public class NLService extends NotificationListenerService {
 
 		Log.d("contentIntent", notification.contentIntent.toString());
 		try {
-			this.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+			sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
 			mInGame = true;
 			notification.contentIntent.send(this, 0, new Intent());
 		} catch (PendingIntent.CanceledException e) {

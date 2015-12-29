@@ -14,15 +14,16 @@ import java.util.List;
 public class AService extends AccessibilityService {
 
 	enum State {
-		WALK,
-		CHAT,
-		NEW,
+		CHAT_WALK,
+		CHAT_IDLE,
+		CHAT_NEW,
 		OPEN,
 		DETAIL,
 	}
 
-	static State state = State.WALK;
+	static State state = State.CHAT_WALK;
 	static Integer openStackSize = 0;
+	static Integer newSize = 0;
 	static boolean lock = false;
 
 	@Override
@@ -54,7 +55,7 @@ public class AService extends AccessibilityService {
 		for (AccessibilityNodeInfo node: mNodes){
 			Log.d("node", node.toString());
 			Log.d("node.parent", node.getParent().toString());
-			Log.d("Click", "GET");
+			Log.d("click", "GET");
 			node.getParent().performAction(AccessibilityNodeInfo.ACTION_CLICK);
 		}
 
@@ -62,18 +63,20 @@ public class AService extends AccessibilityService {
 	}
 
 
-	Integer getFromLastNode(AccessibilityNodeInfo root){
+	Integer getFromLastNode(AccessibilityNodeInfo root, Integer size){
 		List<AccessibilityNodeInfo> mNodes =
 				root.findAccessibilityNodeInfosByText(getResources().getString(R.string.chat_pattern));
 
-		if (mNodes.size() == 0) return 0;
-		AccessibilityNodeInfo node = mNodes.get(mNodes.size() - 1);
-		Log.d("node", node.toString());
-		Log.d("node.parent", node.getParent().toString());
-		Log.d("Click", "GET");
-		node.getParent().performAction(AccessibilityNodeInfo.ACTION_CLICK);
+		size = Math.min(size, mNodes.size());
+		for (Integer i=mNodes.size()-size; i<mNodes.size(); i++){
+			AccessibilityNodeInfo node = mNodes.get(i);
+			Log.d("node", node.toString());
+			Log.d("node.parent", node.getParent().toString());
+			Log.d("click", "GET");
+			node.getParent().performAction(AccessibilityNodeInfo.ACTION_CLICK);
+		}
 
-		return 1;
+		return size;
 	}
 
 	void logState(){
@@ -91,74 +94,69 @@ public class AService extends AccessibilityService {
 		source = event.getSource();
 
 		switch (state) {
-			case WALK:
-				openStackSize = getFromNode(source);
+			case CHAT_WALK:
+				openStackSize += getFromNode(source);
 				if (openStackSize > 0) {
 					state = State.OPEN;
 				} else {
-					state = State.CHAT;
+					state = State.CHAT_IDLE;
 				}
 
 				break;
 			case OPEN:
 				Log.d("open", source.toString());
 				if (source.getClassName().toString().equals("android.widget.Button")) {
-					Log.d("Click", "OPEN");
+					Log.d("click", "OPEN");
 					source.performAction(AccessibilityNodeInfo.ACTION_CLICK);
 					state = State.DETAIL;
 					break;
 				}
 
 			case DETAIL:
-				if (!source.getClassName().toString().equals("android.widget.LinearLayout")) {
+//				if (!source.getClassName().toString().equals("android.widget.LinearLayout")) {
 					if (source.getText() == null) break;
 					if (!( source.getText().toString().equals("Details")
 						|| source.getText().toString().equals("红包详情")
 						)) break;
-				}
+//				}
 
-				Log.d("Click", "BACK");
+				Log.d("click", "BACK");
 				performGlobalAction(GLOBAL_ACTION_BACK);
 				openStackSize -= 1;
 
 				if (openStackSize > 0) {
 					state = State.OPEN;
 				} else {
-//					Log.d("Click", "BACK");
+//					Log.d("click", "BACK");
 //					performGlobalAction(GLOBAL_ACTION_BACK);
-					state = State.CHAT;
+					state = State.CHAT_IDLE;
 				}
 
 				break;
-			case CHAT:
+			case CHAT_IDLE:
 				if (NLService.catchTheGame()){
-					state = State.NEW;
+					newSize += 1;
+					state = State.CHAT_NEW;
 				} else {
-//					Log.d("chat", source.toString());
+					if (event.getRecordCount()<=0) return;
+					record = event.getRecord(0); // Wechat only add 1 node once.
+					Log.d("chat record", record.toString());
+					Log.d("chat source", source.toString());
+
+					for (CharSequence cText: record.getText()){
+						if (cText.toString().matches(getResources().getString(R.string.chat_pattern))) {
+							Log.d("source", source.toString());
+							openStackSize += getFromLastNode(source, 1);
+							if (openStackSize>0) state = State.OPEN;
+							break;
+						}
+					}
+
 				}
 				break;
-			case NEW:
-				openStackSize = getFromLastNode(source);
-
-//				if (event.getRecordCount()<=0) return; logState();
-//				record = event.getRecord(0); // Wechat only add 1 node once.
-//
-//				Log.i("record", record.toString());
-//				if (record.getText().toString().equals("[1]")) {
-//					Log.i("record", record.toString());
-//					source = record.getSource();
-//					source = source.getChild(1);
-//
-//					for (Integer i=0; i<source.getChildCount(); i++){
-//						Log.i("node" + i.toString(), source.getChild(i).toString());
-//						Log.i("Click", "GET");
-//						source.getChild(i).performAction(AccessibilityNodeInfo.ACTION_CLICK);
-//					}
-
-//					source = source.getParent();
-//					Log.i("record.source", source.toString());
-//					openStackSize = getFromNode(source);
-//				}
+			case CHAT_NEW:
+				openStackSize += getFromLastNode(source, newSize);
+				newSize -= openStackSize;
 
 				if (openStackSize>0) state = State.OPEN;
 				break;
