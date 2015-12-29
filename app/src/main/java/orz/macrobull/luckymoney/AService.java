@@ -26,7 +26,7 @@ public class AService extends AccessibilityService {
 	static Integer cnt_new = 0;
 	static Float amount_total = Float.valueOf(0);
 	static Float amount_success = Float.valueOf(0);
-	static boolean openIsValid = false;
+	static Integer detail_flags = 0;
 
 	public static String getStatistics(){
 		return String.format(
@@ -123,30 +123,34 @@ public class AService extends AccessibilityService {
 					Log.d("click", "OPEN");
 					source.performAction(AccessibilityNodeInfo.ACTION_CLICK);
 					cnt_open += 1;
-					openIsValid = true;
+					detail_flags = 1;
 					state = State.DETAIL;
 					break;
 				}
 
 			case DETAIL:
-				Log.d("detail", source.toString());
+//				Log.d("detail", source.toString());
 //				if (!source.getClassName().toString().equals("android.widget.LinearLayout")) {
 				if (source.getText() == null) break;
 				Log.d("detail text", source.getText().toString());
+
+				if (!( source.getText().toString().equals("Details")
+						|| source.getText().toString().equals("红包详情")
+				)) detail_flags |= 2;
+
 				if (source.getText().toString().matches("\\d+\\.\\d\\d")){
 					try {
 						Log.d("amount", "got value:" + source.getText().toString());
 						amount_total += Float.valueOf(source.getText().toString());
-						if (openIsValid) amount_success += Float.valueOf(source.getText().toString());
-						openIsValid = false;
+						if ((detail_flags & 1)>0) amount_success += Float.valueOf(source.getText().toString());
+						detail_flags |= 4;
 					} catch (Exception e){
 						Log.w("amount", e.getMessage());
 					}
 				}
-				if (!( source.getText().toString().equals("Details")
-						|| source.getText().toString().equals("红包详情")
-				)) break;
 //				}
+				if ((detail_flags & 6) != 6) return;
+				detail_flags = 0;
 
 				Log.d("click", "BACK");
 				performGlobalAction(GLOBAL_ACTION_BACK); // Not available when screen is locked.
