@@ -4,45 +4,47 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusable="true"
+    android:icon="@mipmap/ic_launcher"
+    android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context=".MainActivity">
 
     <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:id="@+id/linearLayout">
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="NLStatus"
-            android:id="@+id/b_nl"
-            android:layout_gravity="center_horizontal"
-            android:onClick="openNLSetting"/>
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ASStatus"
-            android:id="@+id/b_as"
-            android:layout_gravity="center_horizontal"
-            android:onClick="openASSetting"/>
-    </LinearLayout>
-
-    <TextView
+        android:id="@+id/linearLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="stat"
-        android:id="@+id/t_stat"
-        android:layout_below="@+id/linearLayout"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"
-        android:textAlignment="center"/>
+        android:layout_alignParentEnd="false"
+        android:layout_centerInParent="true"
+        android:focusable="true"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/b_nl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:onClick="openNLSetting"
+            android:text="NLStatus"/>
+
+        <Button
+            android:id="@+id/b_as"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:onClick="openASSetting"
+            android:text="ASStatus"/>
+
+        <TextView
+            android:id="@+id/t_stat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="stat"
+            android:textAlignment="center"/>
+    </LinearLayout>
+
 </RelativeLayout>
