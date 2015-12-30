@@ -84,7 +84,7 @@ public class NLService extends NotificationListenerService {
 		if (!(sbn.getPackageName().equals(getResources().getString(R.string.target_pname))
 			|| sbn.getPackageName().equals(getResources().getString(R.string.target_pname_parallel))
 		))
-			return; // 过滤应用: 仅微信和双开大师/w\
+			return; // 过滤应用: 微信和双开/w\
 
 		Notification notification = sbn.getNotification();
 		String fullText = notification.extras.getString("android.text"); // 测试表明全文本更靠谱
