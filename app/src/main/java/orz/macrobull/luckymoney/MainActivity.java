@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -94,6 +95,14 @@ public class MainActivity extends AppCompatActivity {
 	public void openASSetting(View v) {
 		Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
 		startActivity(intent);
+	}
+
+	/**
+	 * 设置手动拆红包模式
+	 * @param v CheckBox cb_man
+	 */
+	public void setModeMan(View v) {
+		AService.mode_man = ((CheckBox)v).isChecked();
 	}
 
 }
