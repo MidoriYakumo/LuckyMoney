@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
 	/**
 	 * 打开设置中的通知监听选项
 	 *
-	 * @param v
+	 * @param v View
 	 */
 	public void openNLSetting(View v) {
 //		Intent intent=new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS); // Android Lint说API22+再使用这个
@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
 	/**
 	 * 打开设置中的辅助服务选项
 	 *
-	 * @param v
+	 * @param v View
 	 */
 	public void openASSetting(View v) {
 		Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);

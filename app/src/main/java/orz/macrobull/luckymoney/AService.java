@@ -1,10 +1,13 @@
 package orz.macrobull.luckymoney;
 
 import android.accessibilityservice.AccessibilityService;
+import android.app.Service;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityRecord;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -36,6 +39,7 @@ public class AService extends AccessibilityService {
 	 * 4: 金额出现
 	 */
 	static Integer flags_detail = 0;
+
 	AccessibilityNodeInfo source;
 	AccessibilityRecord record;
 
@@ -141,12 +145,12 @@ public class AService extends AccessibilityService {
 		Log.d("state", state.toString() + "/" + size_open.toString() + "/" + size_new.toString());
 	}
 
+	Integer debug_cnt_open = -1;
 	/**
 	 * 处理UI变动
 	 *
 	 * @param event AccessibilityEvent
 	 */
-	Integer debug_cnt_open = -1;
 	void process(AccessibilityEvent event) {
 		source = event.getSource();
 		if (source == null) return;
@@ -157,26 +161,29 @@ public class AService extends AccessibilityService {
 				size_open += getFromNode(source);
 				if (size_open > 0) {
 					state = State.OPEN;
+					debug_cnt_open = 0;
 				} else {
 					state = State.CHAT_IDLE;
 				}
 
 				break;
 			case OPEN: // 已打开红包
-				if (debug_cnt_open<0) debug_cnt_open = 0; else debug_cnt_open += 1;
+				debug_cnt_open += 1;
 				Log.d("open debug_cnt_open", debug_cnt_open.toString());
 				Log.d("open", source.toString());
+				// 寻找拆红包按钮
+				// #FIXME 6.3.8在某些设备上找不到按钮, 点击了所有新组件都没有效果
 				if (source.getClassName().toString().equals("android.widget.Button")) {
-					// 寻找拆红包按钮
-					// #FIXME 6.3.8在五儿子CM12上找不到按钮, 点击了所有新组件都没有效果, 狗带...
 					Log.d("click", "OPEN");
 					source.performAction(AccessibilityNodeInfo.ACTION_CLICK); // 拆红包
 					cnt_open += 1;
 					flags_detail = 1; // 红包有效
 					state = State.DETAIL;
 					break;
-				} else if (debug_cnt_open>7) {
-//					Vi
+				} else if (debug_cnt_open>6) { // 只好震动提示手动拆包
+					Toast.makeText(this, "Open button cannot be touched, do it yourself!", Toast.LENGTH_SHORT).show();
+					Vibrator vibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
+					vibrator.vibrate(new long[]{300, 100, 300, 100}, -1);
 				}
 
 				// #TODO 处理没抢到的红包
@@ -218,6 +225,7 @@ public class AService extends AccessibilityService {
 
 				if (size_open > 0) {
 					state = State.OPEN;
+					debug_cnt_open = 0;
 				} else {
 					NLService.releaseLock(); // 结束抢红包后解除wakelock和恢复锁屏
 					state = State.CHAT_IDLE;
@@ -254,7 +262,10 @@ public class AService extends AccessibilityService {
 					if (maybeMoney) {
 						Log.d("source", source.toString());
 						size_open += getFromLastNode(source, 1, false); // 只点最后一个红包, 并检测重复
-						if (size_open > 0) state = State.OPEN;
+						if (size_open > 0) {
+							state = State.OPEN;
+							debug_cnt_open = 0;
+						}
 					}
 
 				}
@@ -263,7 +274,10 @@ public class AService extends AccessibilityService {
 				size_open += getFromLastNode(source, size_new, true); // 点最后size_new个红包, 不检测重复(UI节点重用情况)
 				size_new -= size_open;
 
-				if (size_open > 0) state = State.OPEN;
+				if (size_open > 0) {
+					state = State.OPEN;
+					debug_cnt_open = 0;
+				}
 				break;
 		}
 
