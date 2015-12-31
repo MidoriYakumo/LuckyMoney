@@ -5,9 +5,8 @@
     <string name="notify_pattern">.*\\[微信红包\\].+</string>
     <string name="chat_pattern">领取红包</string>
     <string name="intro">支持以下情形:\n
-    1.\n
-    2.\n
-    3.\n
-    4.</string>
-    <!--<string name="target_pattern">.+\\: \\[微信红包\\].+</string>-->
+    1. 处于本群聊天视图, 并位于最底部\n
+    2. 处于其他群聊天, 开启通知\n
+    3. 处于微信以外, 开启微信通知, 屏幕点亮\n
+    4. 无密码锁屏, 开启微信通知</string>
 </resources>
