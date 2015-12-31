@@ -77,7 +77,7 @@ public class NLService extends NotificationListenerService {
 	/**
 	 * 通知接收事件
 	 *
-	 * @param sbn
+	 * @param sbn StatusBarNotification
 	 */
 	@Override
 	public void onNotificationPosted(StatusBarNotification sbn) {
@@ -87,15 +87,17 @@ public class NLService extends NotificationListenerService {
 			return; // 过滤应用: 微信和双开/w\
 
 		Notification notification = sbn.getNotification();
-		String fullText = notification.extras.getString("android.text"); // 测试表明全文本更靠谱
+		String text;
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+			text = notification.extras.getString("android.text"); // 全文本更靠谱
+		} else {
+			text = notification.tickerText.toString(); // API 19- 使用tickerText
+		}
 
-		if (fullText == null) return;
+		if (text == null) return;
+		Log.d("text", text);
 
-//		Log.i("tickerText", n.tickerText.toString());
-//		Log.i("extras", n.extras.toString());
-		Log.d("fullText", fullText);
-
-		if (!fullText.matches(getResources().getString(R.string.notify_pattern))) return; // 过滤关键词
+		if (!text.matches(getResources().getString(R.string.notify_pattern))) return; // 过滤关键词
 
 		Log.d("contentIntent", notification.contentIntent.toString());
 		try {
@@ -127,7 +129,7 @@ public class NLService extends NotificationListenerService {
 	/**
 	 * 通知移除事件, 应Android Lint指示, API21- 必需重载, 似乎因此解决魅族Android 4.4无法启动通知监听问题
 	 *
-	 * @param sbn
+	 * @param sbn StatusBarNotification
 	 */
 	@Override
 	public void onNotificationRemoved(StatusBarNotification sbn) {

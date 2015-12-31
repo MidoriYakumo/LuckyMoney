@@ -18,19 +18,8 @@ import java.util.List;
 public class AService extends AccessibilityService {
 
 	static State state = State.CHAT_WALK;                // 服务状态
-	static Integer size_open = 0;                        // 已点开的红包数
-	static Integer size_new = 0;                        // 待处理的新红包数
-	static Integer lastNode = 0;                        // 简单记录上一红包节点hashcode去重复
 	static boolean mutex = false;                        // 互斥锁
-
-	// 统计信息
-	static Integer cnt_get = 0;                        // 点开的红包数
-	static Integer cnt_open = 0;                        // 拆开的红包数
-	static Integer cnt_detail = 0;                        // 进入详情数
-	static Integer cnt_new = 0;                        // 捕获通知次数
-
-	static Float amount_total = 0.0f;        // 红包总金额
-	static Float amount_success = 0.0f;    // 成功抢到的红包总金额
+	static Integer lastNode = 0;                        // 简单记录上一红包节点hashcode去重复
 
 	/*
 	 * 为了确保获得金额信息, 设置详情标志
@@ -40,8 +29,17 @@ public class AService extends AccessibilityService {
 	 */
 	static Integer flags_detail = 0;
 
-	AccessibilityNodeInfo source;
-	AccessibilityRecord record;
+	static Integer size_open = 0;                        // 已点开的红包数
+	static Integer size_new = 0;                        // 待处理的新红包数
+
+	// 统计信息
+	static Integer cnt_get = 0;                        // 点开的红包数
+	static Integer cnt_open = 0;                        // 拆开的红包数
+	static Integer cnt_detail = 0;                        // 进入详情数
+	static Integer cnt_new = 0;                        // 捕获通知次数
+
+	static Float amount_total = 0.0f;        // 红包总金额
+	static Float amount_success = 0.0f;    // 成功抢到的红包总金额
 
 	/**
 	 * 供主界面显示统计信息
@@ -145,7 +143,13 @@ public class AService extends AccessibilityService {
 		Log.d("state", state.toString() + "/" + size_open.toString() + "/" + size_new.toString());
 	}
 
+
+
+	AccessibilityNodeInfo source;
+	AccessibilityRecord record;
+
 	Integer debug_cnt_open = -1;
+
 	/**
 	 * 处理UI变动
 	 *
@@ -181,7 +185,7 @@ public class AService extends AccessibilityService {
 					state = State.DETAIL;
 					break;
 				} else if (debug_cnt_open>6) { // 只好震动提示手动拆包
-					Toast.makeText(this, "Open button cannot be touched, do it yourself!", Toast.LENGTH_SHORT).show();
+					Toast.makeText(this, "Button OPEN cannot get touched, do it yourself!", Toast.LENGTH_SHORT).show();
 					Vibrator vibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
 					vibrator.vibrate(new long[]{300, 100, 300, 100}, -1);
 				}

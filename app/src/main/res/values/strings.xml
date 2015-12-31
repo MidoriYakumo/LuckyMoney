@@ -4,5 +4,10 @@
     <string name="target_pname_parallel">com.lbe.parallel</string>
     <string name="notify_pattern">.*\\[微信红包\\].+</string>
     <string name="chat_pattern">领取红包</string>
+    <string name="intro">支持以下情形:\n
+    1.\n
+    2.\n
+    3.\n
+    4.</string>
     <!--<string name="target_pattern">.+\\: \\[微信红包\\].+</string>-->
 </resources>

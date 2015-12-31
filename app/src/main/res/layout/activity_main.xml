@@ -10,7 +10,8 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:id="@+id/in">
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -46,5 +47,26 @@
             android:text="stat"
             android:textAlignment="center"/>
     </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="https://github.com/MidoriYakumo/LuckyMoney"
+        android:id="@+id/t_link"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:linksClickable="true"
+        android:autoLink="web"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="@string/intro"
+        android:id="@+id/t_intro"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:textAlignment="textStart"/>
 
 </RelativeLayout>
