@@ -26,8 +26,8 @@ public class AService extends AccessibilityService {
 	static Integer cnt_detail = 0;                        // 进入详情数
 	static Integer cnt_new = 0;                        // 捕获通知次数
 
-	static Float amount_total = Float.valueOf(0);        // 红包总金额
-	static Float amount_success = Float.valueOf(0);    // 成功抢到的红包总金额
+	static Float amount_total = 0.0f;        // 红包总金额
+	static Float amount_success = 0.0f;    // 成功抢到的红包总金额
 
 	/*
 	 * 为了确保获得金额信息, 设置详情标志
@@ -42,19 +42,19 @@ public class AService extends AccessibilityService {
 	/**
 	 * 供主界面显示统计信息
 	 *
-	 * @return
+	 * @return 统计信息
 	 */
 	public static String getStatistics() {
 		return String.format(
 				"点了%d个红包, 开了%d个\n抢到了%d个红包\n从通知抢了%d次"
-						+ "\n在路过的%.2f元中抢到了%.2f元"
+						+ "\n路过%.2f元, 抢到%.2f元"
 				, cnt_get, cnt_detail, cnt_open, cnt_new, amount_total, amount_success);
 	}
 
 	/**
 	 * 监视UI变更事件
 	 *
-	 * @param event
+	 * @param event AccessibilityEvent
 	 */
 	@Override
 	public void onAccessibilityEvent(AccessibilityEvent event) {
@@ -144,8 +144,9 @@ public class AService extends AccessibilityService {
 	/**
 	 * 处理UI变动
 	 *
-	 * @param event
+	 * @param event AccessibilityEvent
 	 */
+	Integer debug_cnt_open = -1;
 	void process(AccessibilityEvent event) {
 		source = event.getSource();
 		if (source == null) return;
@@ -162,6 +163,8 @@ public class AService extends AccessibilityService {
 
 				break;
 			case OPEN: // 已打开红包
+				if (debug_cnt_open<0) debug_cnt_open = 0; else debug_cnt_open += 1;
+				Log.d("open debug_cnt_open", debug_cnt_open.toString());
 				Log.d("open", source.toString());
 				if (source.getClassName().toString().equals("android.widget.Button")) {
 					// 寻找拆红包按钮
@@ -172,6 +175,8 @@ public class AService extends AccessibilityService {
 					flags_detail = 1; // 红包有效
 					state = State.DETAIL;
 					break;
+				} else if (debug_cnt_open>7) {
+//					Vi
 				}
 
 				// #TODO 处理没抢到的红包
