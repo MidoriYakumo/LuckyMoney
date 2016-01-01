@@ -110,10 +110,10 @@ public class NLService extends NotificationListenerService {
 				try { // 等待解锁屏幕
 					while (!powerMan.isScreenOn()) { // 好像能用
 						Log.d("keyguard", String.valueOf(keyMan.inKeyguardRestrictedInputMode())); // #FIXME 并不能反映是否已解锁
-						Log.d("keyguard", String.valueOf(powerMan.isScreenOn())); // #FIXME 并不能范颖是否已解锁
+						Log.d("keyguard", String.valueOf(powerMan.isScreenOn())); // #FIXME 并不能反映是否已解锁
 //						Log.d("keyguard", String.valueOf(powerMan.isInteractive())); // isScreenOn是deprecated, 但是isInteractive是API20+...
 						Log.d("keyguard", "locked");
-						Thread.sleep(100); // 极糟糕的workaround
+						Thread.sleep(250); // 极糟糕的workaround
 					}
 				} catch (Exception e) {
 					//
@@ -127,13 +127,12 @@ public class NLService extends NotificationListenerService {
 	}
 
 	/**
-	 * 通知移除事件, 应Android Lint指示, API21- 必需重载, 似乎因此解决魅族Android 4.4无法启动通知监听问题
+	 * 通知移除事件, 应Android Lint指示, API21- 必需重载
 	 *
 	 * @param sbn StatusBarNotification
 	 */
 	@Override
 	public void onNotificationRemoved(StatusBarNotification sbn) {
-		super.onNotificationRemoved(sbn);
 		Log.d("onNotificationRemoved", "!");
 	}
 }
