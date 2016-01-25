@@ -10,7 +10,7 @@ android {
         minSdkVersion 18
         targetSdkVersion 23
         versionCode 4
-        versionName '1.0.2'
+        versionName '1.0.3'
     }
     buildTypes {
         release {
@@ -20,7 +20,7 @@ android {
             jniDebuggable false
         }
         debug {
-            versionNameSuffix '-D'
+            versionNameSuffix '-Debug'
         }
     }
     productFlavors {

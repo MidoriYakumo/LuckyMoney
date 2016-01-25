@@ -47,8 +47,8 @@ public class MainActivity extends AppCompatActivity {
 
 		nl_status = NLService.getBindStatus(); // 通知监听服务状态由服务绑定状态标识
 		if (!nl_status) try {
-//			startService(new Intent(this, NLService.class));
-//			nl_status = NLService.getBindStatus(); // #FIXME 怎样程序启动这个服务?
+			startService(new Intent(this, NLService.class));
+			nl_status = NLService.getBindStatus(); // #FIXME 怎样程序启动这个服务?
 			Toast.makeText(this, "May recheck notification listener!", Toast.LENGTH_SHORT).show(); // 那只有手动启动啦
 //			openNLSetting(null);
 		} catch (Exception e) {
@@ -68,6 +68,10 @@ public class MainActivity extends AppCompatActivity {
 
 		Button b_nl = (Button) findViewById(R.id.b_nl);
 		Button b_as = (Button) findViewById(R.id.b_as);
+		CheckBox cb_mode = (CheckBox) findViewById(R.id.cb_man);
+
+		cb_mode.setChecked(AService.mode_man);
+
 		b_nl.setText("通知监听服务: " + (nl_status ? "已启动" : "未启动或未启用"));
 		b_as.setText("点击辅助服务: " + (as_status ? "已启动" : "未启用"));
 

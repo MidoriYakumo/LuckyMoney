@@ -46,7 +46,8 @@
             android:layout_alignBottom="@+id/linearLayout"
             android:layout_alignEnd="@+id/t_intro"
             android:checked="false"
-            android:onClick="setModeMan"/>
+            android:onClick="setModeMan"
+            android:layout_gravity="center_horizontal"/>
 
         <TextView
             android:id="@+id/t_stat"
@@ -54,8 +55,9 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="10dp"
-            android:text="stat"
-            android:textAlignment="center"/>
+            android:text="statistics"
+            android:textAlignment="center"
+            android:layout_gravity="center_horizontal"/>
 
     </LinearLayout>
 
@@ -68,7 +70,8 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:linksClickable="true"
-        android:autoLink="web"/>
+        android:autoLink="web"
+        android:alpha="0.02"/>
 
     <TextView
         android:layout_width="wrap_content"
