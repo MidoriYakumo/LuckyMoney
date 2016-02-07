@@ -68,9 +68,9 @@ public class MainActivity extends AppCompatActivity {
 
 		Button b_nl = (Button) findViewById(R.id.b_nl);
 		Button b_as = (Button) findViewById(R.id.b_as);
-		CheckBox cb_mode = (CheckBox) findViewById(R.id.cb_man);
-
-		cb_mode.setChecked(AService.mode_man);
+//		CheckBox cb_mode = (CheckBox) findViewById(R.id.cb_man);
+//
+//		cb_mode.setChecked(AService.mode_man);
 
 		b_nl.setText("通知监听服务: " + (nl_status ? "已启动" : "未启动或未启用"));
 		b_as.setText("点击辅助服务: " + (as_status ? "已启动" : "未启用"));
@@ -101,12 +101,12 @@ public class MainActivity extends AppCompatActivity {
 		startActivity(intent);
 	}
 
-	/**
-	 * 设置手动拆红包模式
-	 * @param v CheckBox cb_man
-	 */
-	public void setModeMan(View v) {
-		AService.mode_man = ((CheckBox)v).isChecked();
-	}
+//	/**
+//	 * 设置手动拆红包模式
+//	 * @param v CheckBox cb_man
+//	 */
+//	public void setModeMan(View v) {
+//		AService.mode_man = ((CheckBox)v).isChecked();
+//	}
 
 }

@@ -9,8 +9,8 @@ android {
         applicationId 'orz.macrobull.luckymoney'
         minSdkVersion 18
         targetSdkVersion 23
-        versionCode 4
-        versionName '1.0.3'
+        versionCode 6
+        versionName '1.1.0'
     }
     buildTypes {
         release {

@@ -149,6 +149,31 @@ public class AService extends AccessibilityService {
 	AccessibilityNodeInfo source;
 	AccessibilityRecord record;
 
+
+	/**
+	 * 爬遍所有节点查找可点的按钮，用于解决Android5.1等组件层次分离的情况
+	 * @param root 界面根节点
+	 */
+	void crawlButton(AccessibilityNodeInfo root){
+		AccessibilityNodeInfo child;
+		Integer size = root.getChildCount();
+		for (Integer i=0;i<size;i++){
+			child = root.getChild(i);
+			if (child != null) {
+				if (child.getClassName().toString().equals("android.widget.Button")) {
+					Log.d("crawl-button", child.toString());
+					Log.d("click", "OPEN");
+					child.performAction(AccessibilityNodeInfo.ACTION_CLICK); // 拆红包
+					cnt_open += 1;
+					flags_detail = 1; // 红包有效
+					state = State.DETAIL;
+				}
+				crawlButton(child);
+			}
+
+		}
+	}
+
 	/**
 	 * 处理UI变动
 	 *
@@ -171,20 +196,11 @@ public class AService extends AccessibilityService {
 				break;
 			case OPEN: // 已打开红包
 				Log.d("open", source.toString());
+
 				// 寻找拆红包按钮
-				// #FIXME 6.3.8在某些设备上找不到按钮, 点击了所有新组件都没有效果
-				if (source.getClassName().toString().equals("android.widget.Button")) {
-					Log.d("click", "OPEN");
-					source.performAction(AccessibilityNodeInfo.ACTION_CLICK); // 拆红包
-					cnt_open += 1;
-					flags_detail = 1; // 红包有效
-					state = State.DETAIL;
-					break;
-				} else if (mode_man) { // 只好震动提示手动拆包
-					Toast.makeText(this, "OPEN THE LUCKY MONEY!", Toast.LENGTH_SHORT).show();
-					Vibrator vibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
-					vibrator.vibrate(new long[]{300, 100, 300, 100}, -1);
-				}
+				AccessibilityNodeInfo root = super.getRootInActiveWindow();
+				if (root != null) crawlButton(root);
+				if (state != State.OPEN) break;
 
 				// #TODO 处理没抢到的红包
 				// 已拆的红包会进入详情界面
@@ -229,6 +245,8 @@ public class AService extends AccessibilityService {
 					NLService.releaseLock(); // 结束抢红包后解除wakelock和恢复锁屏
 					state = State.CHAT_IDLE;
 				}
+
+				lastNode = 0;
 
 				break;
 			case CHAT_IDLE: // 聊天界面

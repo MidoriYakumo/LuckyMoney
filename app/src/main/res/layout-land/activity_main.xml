@@ -38,17 +38,6 @@
             android:onClick="openASSetting"
             android:text="ASStatus"/>
 
-        <CheckBox
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="手动拆红包"
-            android:id="@+id/cb_man"
-            android:layout_alignBottom="@+id/linearLayout"
-            android:layout_alignEnd="@+id/t_intro"
-            android:checked="false"
-            android:onClick="setModeMan"
-            android:layout_gravity="center_horizontal"/>
-
         <TextView
             android:id="@+id/t_stat"
             android:layout_width="wrap_content"
@@ -71,7 +60,7 @@
         android:layout_centerHorizontal="true"
         android:linksClickable="true"
         android:autoLink="web"
-        android:alpha="0.02"/>
+        android:alpha="0.05"/>
 
     <TextView
         android:layout_width="wrap_content"
