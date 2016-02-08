@@ -20,7 +20,6 @@ public class AService extends AccessibilityService {
 	static State state = State.CHAT_WALK;                // 服务状态
 	static boolean mutex = false;                        // 互斥锁
 	static Integer lastNode = 0;                        // 简单记录上一红包节点hashcode去重复
-	public static boolean mode_man = false;
 
 	/*
 	 * 为了确保获得金额信息, 设置详情标志
@@ -28,7 +27,8 @@ public class AService extends AccessibilityService {
 	 * 2: 左上角"详情"出现
 	 * 4: 金额出现
 	 */
-	static Integer flags_detail = 0;
+	static Integer  flags_detail = 0;
+	static Boolean  isFromNotification = false;
 
 	static Integer size_open = 0;                        // 已点开的红包数
 	static Integer size_new = 0;                        // 待处理的新红包数
@@ -99,11 +99,15 @@ public class AService extends AccessibilityService {
 
 		for (AccessibilityNodeInfo node : mNodes) {
 			Log.d("node", node.toString());
-			Log.d("node.parent", node.getParent().toString()); // 有时候没有父节点, 蜜汁bug
-			Log.d("click", "GET" + Integer.valueOf(node.hashCode()).toString());
-			node.getParent().performAction(AccessibilityNodeInfo.ACTION_CLICK); // TextView不能点, 点的是ListView, 详情查看clickable
-			cnt_get += 1;
-			lastNode = node.hashCode();
+			AccessibilityNodeInfo parent = node.getParent();
+			if (parent == null) {
+				Log.d("node.parent", "null"); // 有时候没有父节点, 蜜汁bug
+			} else {
+				Log.d("click", "GET" + Integer.valueOf(node.hashCode()).toString());
+				parent.performAction(AccessibilityNodeInfo.ACTION_CLICK); // TextView不能点, 点的是ListView, 详情查看clickable
+				cnt_get += 1;
+				lastNode = node.hashCode();
+			}
 		}
 
 		return mNodes.size(); // 即搜索结果数目
@@ -125,15 +129,19 @@ public class AService extends AccessibilityService {
 		for (Integer i = mNodes.size() - size; i < mNodes.size(); i++) {
 			AccessibilityNodeInfo node = mNodes.get(i);
 			Log.d("node", node.toString());
-			Log.d("node.parent", node.getParent().toString());
-			if (ignoreDup || (lastNode != node.hashCode())) { // 非重复红包, 点击
-				Log.d("click", "GET" + Integer.valueOf(node.hashCode()).toString());
-				node.getParent().performAction(AccessibilityNodeInfo.ACTION_CLICK);
-				cnt_get += 1;
-				lastNode = node.hashCode();
+			AccessibilityNodeInfo parent = node.getParent();
+			if (parent == null) {
+				Log.d("node.parent", "null"); // 有时候没有父节点, 蜜汁bug
 			} else {
-				Log.d("node duplicate", Integer.valueOf(node.hashCode()).toString());
-				size -= 1; // 重复红包, 减少成功计数
+				if (ignoreDup || (lastNode != node.hashCode())) { // 非重复红包, 点击
+					Log.d("click", "GET" + Integer.valueOf(node.hashCode()).toString());
+					parent.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+					cnt_get += 1;
+					lastNode = node.hashCode();
+				} else {
+					Log.d("node duplicate", Integer.valueOf(node.hashCode()).toString());
+					size -= 1; // 重复红包, 减少成功计数
+				}
 			}
 		}
 
@@ -149,6 +157,15 @@ public class AService extends AccessibilityService {
 	AccessibilityNodeInfo source;
 	AccessibilityRecord record;
 
+	AccessibilityNodeInfo getRoot(AccessibilityNodeInfo node){
+		AccessibilityNodeInfo parent;
+		parent = node.getParent();
+		while (parent != null) {
+			node = parent;
+			parent = node.getParent();
+		}
+		return node;
+	}
 
 	/**
 	 * 爬遍所有节点查找可点的按钮，用于解决Android5.1等组件层次分离的情况
@@ -198,8 +215,11 @@ public class AService extends AccessibilityService {
 				Log.d("open", source.toString());
 
 				// 寻找拆红包按钮
-				AccessibilityNodeInfo root = super.getRootInActiveWindow();
-				if (root != null) crawlButton(root);
+				AccessibilityNodeInfo root;
+				root = super.getRootInActiveWindow();
+				if (root == null) root = getRoot(source);
+				crawlButton(root);
+
 				if (state != State.OPEN) break;
 
 				// #TODO 处理没抢到的红包
@@ -242,15 +262,15 @@ public class AService extends AccessibilityService {
 				if (size_open > 0) {
 					state = State.OPEN;
 				} else {
+					if (!isFromNotification) lastNode = 0; // 清除上一个节点hash, 因为潜在的节点重用？
 					NLService.releaseLock(); // 结束抢红包后解除wakelock和恢复锁屏
 					state = State.CHAT_IDLE;
 				}
 
-				lastNode = 0;
-
 				break;
 			case CHAT_IDLE: // 聊天界面
 				if (NLService.catchTheGame()) { // 通知表明有新红包(后台或其他聊天界面有红包)
+					isFromNotification = true;
 					cnt_new += 1;
 					size_new += 1;
 					state = State.CHAT_NEW;
@@ -278,6 +298,7 @@ public class AService extends AccessibilityService {
 
 					if (maybeMoney) {
 						Log.d("source", source.toString());
+						isFromNotification = false;
 						size_open += getFromLastNode(source, 1, false); // 只点最后一个红包, 并检测重复
 						if (size_open > 0) state = State.OPEN;
 					}
@@ -285,6 +306,7 @@ public class AService extends AccessibilityService {
 				}
 				break;
 			case CHAT_NEW: // 由通知进入聊天界面, 点最后size_new个红包
+				Log.d("isFromNotification", isFromNotification.toString());
 				size_open += getFromLastNode(source, size_new, true); // 点最后size_new个红包, 不检测重复(UI节点重用情况)
 				size_new -= size_open;
 
